@@ -4,6 +4,7 @@ from datetime import datetime
 from aiogoogle import Aiogoogle
 
 from app.core.config import settings
+from .exceptions import DBDataBiggerThanTableException
 
 
 DATE_FORMAT = '%Y/%m/%d %H:%M:%S'
@@ -29,6 +30,13 @@ TABLE_VALUES = [
     ['Топ проектов по скорости закрытия'],
     ['Название проекта', 'Время сбора', 'Описание']
 ]
+DB_DATA_BIGGER_THAN_TABLE_MESSAGE = (
+    'Ошибка при вставке данных\n'
+    'Строк в таблице: {table_rows}\n'
+    'Строк занимают данные из БД: {db_rows}\n'
+    'Столбцов в таблице: {table_cols}\n'
+    'Столбцов занимают данные из БД: {db_cols}'
+)
 
 
 async def spreadsheets_create(wrapper_services: Aiogoogle) -> tuple:
@@ -77,9 +85,17 @@ async def spreadsheets_update_value(
             for charity_project in charity_projects
           ]
     ]
-    if (len(table_values) > ROW_COUNT or
-            len(max(table_values, key=len)) > COLUMN_COUNT):
-        raise IndexError()
+    from_db_rows_count = len(table_values)
+    from_db_columns_count = len(max(table_values, key=len))
+    if from_db_rows_count > ROW_COUNT or from_db_columns_count > COLUMN_COUNT:
+        raise DBDataBiggerThanTableException(
+            DB_DATA_BIGGER_THAN_TABLE_MESSAGE.format(
+                table_rows=ROW_COUNT,
+                db_rows=from_db_rows_count,
+                table_cols=COLUMN_COUNT,
+                db_cols=from_db_columns_count
+            )
+        )
     update_body = {
         'majorDimension': 'ROWS',
         'values': table_values
@@ -87,9 +103,7 @@ async def spreadsheets_update_value(
     await wrapper_services.as_service_account(
         service.spreadsheets.values.update(
             spreadsheetId=spreadsheet_id,
-            range=(
-                f'R1C1:R{len(table_values)}C{len(max(table_values, key=len))}'
-            ),
+            range=f'R1C1:R{from_db_rows_count}C{from_db_columns_count}',
             valueInputOption='USER_ENTERED',
             json=update_body
         )

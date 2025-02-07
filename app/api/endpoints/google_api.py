@@ -11,6 +11,7 @@ from app.schemas.charity_project import CharityProjectDB
 from app.services.google_api import (
     spreadsheets_create, set_user_permissions, spreadsheets_update_value
 )
+from app.services.exceptions import DBDataBiggerThanTableException
 
 
 router = APIRouter()
@@ -37,6 +38,6 @@ async def get_report(
         await spreadsheets_update_value(spreadsheet_id,
                                         charity_projects,
                                         wrapper_services)
-    except IndexError:
-        print(f'Не хватает места для внесения данных. URL - {spreadsheet_url}')
+    except DBDataBiggerThanTableException as e:
+        print(str(e) + f'\nURL: {spreadsheet_url}')
     return charity_projects
