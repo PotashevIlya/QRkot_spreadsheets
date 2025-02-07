@@ -29,9 +29,14 @@ async def get_report(
     charity_projects = (
         await charity_project_crud.get_projects_by_completion_rate(session)
     )
-    spreadsheetid = await spreadsheets_create(wrapper_services)
-    await set_user_permissions(spreadsheetid, wrapper_services)
-    await spreadsheets_update_value(spreadsheetid,
-                                    charity_projects,
-                                    wrapper_services)
+    spreadsheet_id, spreadsheet_url = await spreadsheets_create(
+        wrapper_services
+    )
+    await set_user_permissions(spreadsheet_id, wrapper_services)
+    try:
+        await spreadsheets_update_value(spreadsheet_id,
+                                        charity_projects,
+                                        wrapper_services)
+    except IndexError:
+        print(f'Не хватает места для внесения данных. URL - {spreadsheet_url}')
     return charity_projects
