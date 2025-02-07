@@ -7,7 +7,7 @@ Cat Charity Fund - это сервис для отправки пожертво�
 1. Клонировать репозиторий и перейти в него в командной строке:
 
 ```
-git clone https://github.com/PotashevIlya/cat_charity_fund
+git clone https://github.com/PotashevIlya/QRkot_spreadsheets
 cd cat_charity_fund
 ```
 2. Cоздать и активировать виртуальное окружение:
@@ -78,7 +78,7 @@ uvicorn app.main:app
 Полная спецификация проекта будет доступка после запуска сервера: [swagger](http://127.0.0.1:8000/docs), [redoc](http://127.0.0.1:8000/redoc)
 
 ### Технологический стек :bulb:
-Python, FastAPI, SQLAlchemy
+Python, FastAPI, SQLAlchemy, Aiogoogle
 ___  
 #### Автор проекта:  
 :small_orange_diamond: [Поташев Илья](https://github.com/PotashevIlya) 
