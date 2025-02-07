@@ -1,5 +1,6 @@
 from aiogoogle import Aiogoogle
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from http import HTTPStatus
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_async_session
@@ -11,7 +12,6 @@ from app.schemas.charity_project import CharityProjectDB
 from app.services.google_api import (
     spreadsheets_create, set_user_permissions, spreadsheets_update_value
 )
-from app.services.exceptions import DBDataBiggerThanTableException
 
 
 router = APIRouter()
@@ -38,6 +38,9 @@ async def get_report(
         await spreadsheets_update_value(spreadsheet_id,
                                         charity_projects,
                                         wrapper_services)
-    except DBDataBiggerThanTableException as e:
-        print(str(e) + f'\nURL: {spreadsheet_url}')
-    return charity_projects
+    except ValueError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.SERVICE_UNAVAILABLE,
+            detail=str(e)
+        )
+    return spreadsheet_url

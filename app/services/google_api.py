@@ -4,7 +4,6 @@ from datetime import datetime
 from aiogoogle import Aiogoogle
 
 from app.core.config import settings
-from .exceptions import DBDataBiggerThanTableException
 
 
 DATE_FORMAT = '%Y/%m/%d %H:%M:%S'
@@ -31,10 +30,10 @@ TABLE_VALUES = [
     ['Название проекта', 'Время сбора', 'Описание']
 ]
 DB_DATA_BIGGER_THAN_TABLE_MESSAGE = (
-    'Ошибка при вставке данных\n'
-    'Строк в таблице: {table_rows}\n'
-    'Строк занимают данные из БД: {db_rows}\n'
-    'Столбцов в таблице: {table_cols}\n'
+    'Ошибка при вставке данных. '
+    'Строк в таблице: {table_rows} '
+    'Строк занимают данные из БД: {db_rows} '
+    'Столбцов в таблице: {table_cols} '
     'Столбцов занимают данные из БД: {db_cols}'
 )
 
@@ -86,9 +85,9 @@ async def spreadsheets_update_value(
           ]
     ]
     from_db_rows_count = len(table_values)
-    from_db_columns_count = len(max(table_values, key=len))
+    from_db_columns_count = max(map(len, table_values))
     if from_db_rows_count > ROW_COUNT or from_db_columns_count > COLUMN_COUNT:
-        raise DBDataBiggerThanTableException(
+        raise ValueError(
             DB_DATA_BIGGER_THAN_TABLE_MESSAGE.format(
                 table_rows=ROW_COUNT,
                 db_rows=from_db_rows_count,
